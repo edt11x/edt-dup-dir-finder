@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+#
+# Duplicate Directory Finder
+# Licensed under the MIT License. See LICENSE file for details.
+#
 import os
 import hashlib
 import sys

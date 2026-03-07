@@ -69,4 +69,6 @@ Delete index (or 's' skip, 'q' quit):
 - `dup_dir_finder.py`: The main application script.
 - `setup.sh`: Environment setup script.
 - `requirements.txt`: Python dependency list.
-- `.gitignore`: Ensures `venv` and cache files are not tracked by Git.
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
