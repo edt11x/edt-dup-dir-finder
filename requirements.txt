@@ -1,0 +1,3 @@
+# Requirements for Duplicate Directory Finder
+# This project currently only uses the Python standard library.
+# No external dependencies are required.
