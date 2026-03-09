@@ -16,6 +16,12 @@ FILE_HASH_CACHE = {}
 def get_file_hash(filepath):
     """Calculates the SHA-256 hash of a file with caching."""
     try:
+        # Dangling symlinks can't be read; hash the target path instead so they
+        # are included in directory signatures rather than silently dropped.
+        if os.path.islink(filepath) and not os.path.exists(filepath):
+            target = os.readlink(filepath)
+            return hashlib.sha256(f"SYMLINK:{target}".encode()).hexdigest()
+
         stat = os.stat(filepath)
         cache_key = os.path.abspath(filepath)
         
@@ -48,7 +54,12 @@ def get_dir_metadata(dir_path):
             full_path = os.path.join(root, file)
             rel_path = os.path.relpath(full_path, dir_path)
             try:
-                size = os.path.getsize(full_path)
+                if os.path.islink(full_path) and not os.path.exists(full_path):
+                    # Dangling symlink: os.path.getsize would raise OSError.
+                    # Use the symlink's own lstat size (length of target string).
+                    size = os.lstat(full_path).st_size
+                else:
+                    size = os.path.getsize(full_path)
                 metadata.append((rel_path, size))
                 abs_paths.append(full_path)
             except OSError:
