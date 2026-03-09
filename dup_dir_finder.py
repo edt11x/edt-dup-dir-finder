@@ -10,7 +10,7 @@ import shutil
 from collections import defaultdict
 
 # Directories to skip entirely during all traversals
-IGNORED_DIRS = {'.git', '.local', '.cache', '.config', '.nvm', '.joplin-bin', 'venv'}
+IGNORED_DIRS = {'.git', '.local', '.cache', '.config', '.nvm', '.joplin-bin', 'venv', '.vim'}
 
 # Global cache to avoid re-hashing the same file multiple times
 # Key: absolute path, Value: (mtime, size, hash)
