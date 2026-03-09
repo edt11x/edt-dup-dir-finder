@@ -9,6 +9,9 @@ import sys
 import shutil
 from collections import defaultdict
 
+# Directories to skip entirely during all traversals
+IGNORED_DIRS = {'.git', '.local', '.cache'}
+
 # Global cache to avoid re-hashing the same file multiple times
 # Key: absolute path, Value: (mtime, size, hash)
 FILE_HASH_CACHE = {}
@@ -49,7 +52,8 @@ def get_dir_metadata(dir_path):
     """
     metadata = []
     abs_paths = []
-    for root, _, files in os.walk(dir_path):
+    for root, dirs, files in os.walk(dir_path):
+        dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
         for file in files:
             full_path = os.path.join(root, file)
             rel_path = os.path.relpath(full_path, dir_path)
@@ -75,7 +79,8 @@ def get_full_dir_signature(dir_path):
     Generates the final 'expensive' signature using file hashes.
     """
     files_info = []
-    for root, _, files in os.walk(dir_path):
+    for root, dirs, files in os.walk(dir_path):
+        dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
         for file in files:
             full_path = os.path.join(root, file)
             rel_path = os.path.relpath(full_path, dir_path)
@@ -94,6 +99,7 @@ def find_duplicates(root_search_path):
     print(f"Scanning {root_search_path}...")
     all_dirs = []
     for root, dirs, _ in os.walk(root_search_path):
+        dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
         for d in dirs:
             all_dirs.append(os.path.join(root, d))
     
@@ -121,10 +127,12 @@ def find_duplicates(root_search_path):
         for sig, matched_paths in sub_groups.items():
             if len(matched_paths) > 1:
                 # Calculate size once for the set
-                size = sum(os.lstat(os.path.join(r, f)).st_size
-                           for r, _, files in os.walk(matched_paths[0])
-                           for f in files)
-                count = sum(len(files) for _, _, files in os.walk(matched_paths[0]))
+                size = 0
+                count = 0
+                for r, dirs, files in os.walk(matched_paths[0]):
+                    dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
+                    size += sum(os.lstat(os.path.join(r, f)).st_size for f in files)
+                    count += len(files)
                 final_duplicates[sig] = {
                     'paths': matched_paths,
                     'size': size,
