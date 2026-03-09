@@ -121,8 +121,8 @@ def find_duplicates(root_search_path):
         for sig, matched_paths in sub_groups.items():
             if len(matched_paths) > 1:
                 # Calculate size once for the set
-                size = sum(os.path.getsize(os.path.join(r, f)) 
-                           for r, _, files in os.walk(matched_paths[0]) 
+                size = sum(os.lstat(os.path.join(r, f)).st_size
+                           for r, _, files in os.walk(matched_paths[0])
                            for f in files)
                 count = sum(len(files) for _, _, files in os.walk(matched_paths[0]))
                 final_duplicates[sig] = {
